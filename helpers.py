@@ -47,6 +47,18 @@ def bump_function(inner_bound, outer_bound):
 def one_d_smoothing_function(left, right, rounding_side_lengths=0.5):
     return lambda x: bump_function((right - left) / 2 - rounding_side_lengths,  (right - left) / 2 )(x - (left + right) / 2)
 
+# Credit to https://stackoverflow.com/a/9458386/10538006
+def curry(x, argc=None):
+    if argc is None:
+        argc = x.__code__.co_argcount
+    def p(*a):
+        if len(a) == argc:
+            return x(*a)
+        def q(*b):
+            return x(*(a + b))
+        return curry(q, argc - len(a))
+    return p
+
 if __name__ == "__main__":
     # Testing uniformly_sample_array
     x = np.linspace(0, 100, 1000)
@@ -58,3 +70,11 @@ if __name__ == "__main__":
     # Testing bump_function
     plt.xlim(-5, 5)
     plt.plot(np.linspace(-5, 2, 500), one_d_smoothing_function(-4, -1, 1)(np.linspace(-5, 5, 500)))
+
+    @curry
+    def test_sum(a, b, c):
+        return a + b + c
+
+    print(test_sum(1)(2)(3), test_sum(1, 2)(3), test_sum(1)(2, 3), test_sum(1, 2, 3))
+
+    # Test currying
